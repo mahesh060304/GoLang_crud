@@ -63,12 +63,12 @@ func UpdateUser(c *gin.Context){
 
 		filter := bson.M{"_id":objectID}
 
-        update := bson.M{
-			"$set" : bson.M{	
-				"Username": body.Username,
-				"Email":body.Email,
-				"Password":body.Password,
-			},
+                update := bson.M{
+		  "$set" : bson.M{	
+			"Username": body.Username,
+			"Email":body.Email,
+			"Password":body.Password,
+		   },
 		}
 
 		result ,err := initializers.UserCollection.UpdateOne(context.Background(), filter,update)
@@ -86,8 +86,8 @@ func DeleteUser(c *gin.Context){
 		objectID, err := primitive.ObjectIDFromHex(id)
 
 
-		result, err := initializers.UserCollection.DeleteMany(context.Background(), bson.M{"_id":objectID})
-        log.Println("Delete result:", result)
+		result, err := initializers.UserCollection.DeleteOne(context.Background(), bson.M{"_id":objectID})
+                log.Println("Delete result:", result)
 
 		if err != nil {
 			log.Println("Error deleting users:", err)
