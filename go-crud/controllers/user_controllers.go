@@ -5,6 +5,7 @@ import (
     "log"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/mahesh060304/go-crud/initializers"
     "github.com/mahesh060304/go-crud/models"
 )
@@ -48,12 +49,19 @@ func GetAllUsers(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context){
-		id :=c.Param("_id")
+		id :=c.Param("id")
 
 		var body models.User
         c.BindJSON(&body)
 
-		filter := bson.M{"_id":id}
+		objectID,err:= primitive.ObjectIDFromHex(id)
+		if err != nil {
+			log.Println("Error decoding users:", err)
+			return 
+		}
+
+
+		filter := bson.M{"_id":objectID}
 
         update := bson.M{
 			"$set" : bson.M{	
@@ -63,34 +71,36 @@ func UpdateUser(c *gin.Context){
 			},
 		}
 
-		_, err := initializers.UserCollection.UpdateOne(context.Background(), filter,update)
+		result ,err := initializers.UserCollection.UpdateOne(context.Background(), filter,update)
 		if err != nil {
 			log.Println("Error decoding users:", err)
+			return 
 		}
 	
-		c.JSON(200,"User Updated successfully!",)
+		c.JSON(200,gin.H{"message":"User Updated successfully!","user":result})
 
 }
 
 func DeleteUser(c *gin.Context){
-	id :=c.Param("id")
+	    id :=c.Param("id")
+		objectID, err := primitive.ObjectIDFromHex(id)
 
-		var body models.User
-        c.BindJSON(&body)
 
-		filter := bson.M{"_id":id}
-		log.Println("Filtered data: ",filter)
+		result, err := initializers.UserCollection.DeleteMany(context.Background(), bson.M{"_id":objectID})
+        log.Println("Delete result:", result)
 
-		result , err := initializers.UserCollection.DeleteOne(context.Background(), filter)
 		if err != nil {
 			log.Println("Error deleting users:", err)
 			return 
 		}
 
 		if result.DeletedCount == 0{
+			log.Println("Delete Count:", result.DeletedCount)
+
 			c.JSON(400, gin.H{"error":"User Not Found"})
 			return 
 		}
 		c.JSON(200, gin.H{"message": "User deleted successfully"})
 
 }
+	
