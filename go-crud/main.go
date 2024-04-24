@@ -9,12 +9,13 @@ import (
 func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB()
+	initializers.InitRedis()
 }
 
 func main() {
 	r := gin.Default()
 	r.POST("/addusers",controllers.CreateNewUser)
-        r.GET("/users", controllers.GetAllUsers)
+    r.GET("/users", controllers.GetAllUsers)
 	r.PUT("/updateuser/:id",controllers.UpdateUser)
 	r.DELETE("deleteuser/:id",controllers.DeleteUser)
 
